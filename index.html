@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Magic Garden Clone</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="main-container">
+        <canvas id="gameCanvas" width="600" height="400"></canvas>
+        <div id="ui-side-panel">
+            <div id="status-panel">
+                <div class="stats">Moedas: <span id="moedas">0</span></div>
+                <div class="stats">Sementes: <span id="sementes">5</span></div>
+                <div class="stats">Modo: <span id="modo-plantio">Normal</span></div>
+                <div class="stats">Fazenda: <span id="fazenda-tamanho">8x12</span></div>
+                <div class="stats">Crescimento: <span id="tempo-cultivo">30s</span></div>
+            </div>
+            <div id="shop-grid">
+                <button id="comprar-semente">Comprar Semente</button>
+                <button id="comprar-3x3">Habilidade 3x3</button>
+                <button id="comprar-5x5">Habilidade 5x5</button>
+                <button id="upgrade-velocidade-5s">Comprar -5s</button>
+                <button id="upgrade-velocidade-10s">Comprar -10s</button>
+                <button id="expandir-fazenda">Expandir Fazenda</button>
+                <div id="mode-panel">
+                    <button id="modo-normal">Modo Normal</button>
+                    <button id="modo-3x3">Modo 3x3</button>
+                    <button id="modo-5x5">Modo 5x5</button>
+                </div>
+                <button class="shop-placeholder" disabled>Em breve</button>
+                <button class="shop-placeholder" disabled>Em breve</button>
+                <button class="shop-placeholder" disabled>Em breve</button>
+                <button class="shop-placeholder" disabled>Em breve</button>
+                <button class="shop-placeholder" disabled>Em breve</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
