@@ -455,7 +455,14 @@ document.getElementById('modo-3x3').addEventListener('click', () => setModoPlant
 document.getElementById('modo-5x5').addEventListener('click', () => setModoPlantio('5x5'));
 document.getElementById('modo-descoberta').addEventListener('click', showDiscoveryScreen);
 document.getElementById('voltar-descoberta').addEventListener('click', showGameLayout);
-document.getElementById('arvore-descoberta').addEventListener('click', clicarArvore);
+const arvoreDescoberta = document.getElementById('arvore-descoberta');
+arvoreDescoberta.addEventListener('click', () => {
+    clicarArvore();
+    arvoreDescoberta.classList.add('pulse');
+});
+arvoreDescoberta.addEventListener('animationend', () => {
+    arvoreDescoberta.classList.remove('pulse');
+});
 document.getElementById('evoluir-plantacao').addEventListener('click', evoluirPlantacao);
 
 document.getElementById('upgrade-velocidade-5s').addEventListener('click', () => {
