@@ -29,6 +29,11 @@ const imgPlantaG = new Image();
 let gramaPattern = null;
 let imagesLoaded = 0;
 const totalImages = 4;
+let cliquesArvore = 0;
+let pontosEvolucao = 0;
+let nivelPlantacao = 1;
+let multiplicadorNivel = 1;
+const MAX_NIVEL_PLANTACAO = 5;
 
 function atualizarUI() {
     document.getElementById('moedas').textContent = moedas;
@@ -42,10 +47,94 @@ function atualizarUI() {
     document.getElementById('upgrade-velocidade-5s').textContent = `Comprar -5s (${COSTO_UPGRADE_5S} moedas)`;
     document.getElementById('upgrade-velocidade-10s').textContent = `Comprar -10s (${COSTO_UPGRADE_10S} moedas)`;
     document.getElementById('expandir-fazenda').textContent = `Expandir Fazenda (${custoExpandirFazenda} moedas)`;
+    atualizarEvolucaoUI();
 }
 
 function getTempoCrescimento() {
     return Math.max(5000, Math.round(TEMPO_CRESCIMENTO_BASE / modificadorVelocidade));
+}
+
+function getPontosParaProximoNivel(level) {
+    switch (level) {
+        case 2:
+            return 10;
+        case 3:
+            return 25;
+        case 4:
+            return 40;
+        case 5:
+            return 50;
+        default:
+            return 0;
+    }
+}
+
+function atualizarMultiplicadorNivel() {
+    multiplicadorNivel = 1 + (nivelPlantacao - 1) * 0.5;
+}
+
+function atualizarEvolucaoUI() {
+    const barra = document.getElementById('barra-evolucao');
+    if (barra) {
+        barra.value = cliquesArvore;
+    }
+    const nivelEvolucaoEl = document.getElementById('nivel-evolucao');
+    if (nivelEvolucaoEl) {
+        nivelEvolucaoEl.textContent = pontosEvolucao;
+    }
+    const nivelPlantacaoEl = document.getElementById('nivel-plantacao');
+    if (nivelPlantacaoEl) {
+        nivelPlantacaoEl.textContent = nivelPlantacao;
+    }
+}
+
+function showDiscoveryScreen() {
+    document.getElementById('game-layout').style.display = 'none';
+    document.getElementById('tela-descoberta').style.display = 'block';
+}
+
+function showGameLayout() {
+    document.getElementById('tela-descoberta').style.display = 'none';
+    document.getElementById('game-layout').style.display = 'block';
+}
+
+function clicarArvore() {
+    cliquesArvore++;
+    if (cliquesArvore >= 100) {
+        cliquesArvore = 0;
+        pontosEvolucao++;
+        if (nivelPlantacao < MAX_NIVEL_PLANTACAO) {
+            const pontosNecessarios = getPontosParaProximoNivel(nivelPlantacao + 1);
+            if (pontosEvolucao >= pontosNecessarios) {
+                pontosEvolucao = 0;
+                nivelPlantacao++;
+                atualizarMultiplicadorNivel();
+                alert(`Sua plantação evoluiu para o Nível ${nivelPlantacao}!`);
+            }
+        }
+    }
+    atualizarEvolucaoUI();
+}
+
+function evoluirPlantacao() {
+    if (nivelPlantacao >= MAX_NIVEL_PLANTACAO) {
+        alert('Sua plantação já atingiu o nível máximo.');
+        return;
+    }
+
+    const proximoNivel = nivelPlantacao + 1;
+    const pontosNecessarios = getPontosParaProximoNivel(proximoNivel);
+
+    if (pontosEvolucao >= pontosNecessarios) {
+        pontosEvolucao = 0;
+        nivelPlantacao = proximoNivel;
+        atualizarMultiplicadorNivel();
+        alert(`Parabéns! Sua plantação avançou para o Nível ${nivelPlantacao}.`);
+    } else {
+        alert(`Você precisa de ${pontosNecessarios - pontosEvolucao} pontos de evolução a mais para chegar ao Nível ${proximoNivel}.`);
+    }
+
+    atualizarEvolucaoUI();
 }
 
 function init() {
@@ -134,7 +223,7 @@ function processarArea(centerCol, centerRow, radius) {
                 }, getTempoCrescimento());
             } else if (actionType === 'colheita' && tile.state === 'colheita') {
                 tile.state = 'terra';
-                moedas += 10;
+                moedas += Math.round(10 * multiplicadorNivel);
                 sementes += 1;
                 actions++;
             }
@@ -297,7 +386,7 @@ canvas.addEventListener('click', (e) => {
 
     if (tile.state === 'colheita') {
         tile.state = 'terra';
-        moedas += 10;
+        moedas += Math.round(10 * multiplicadorNivel);
         sementes += 1;
         atualizarUI();
     }
@@ -339,6 +428,10 @@ document.getElementById('comprar-5x5').addEventListener('click', () => {
 document.getElementById('modo-normal').addEventListener('click', () => setModoPlantio('normal'));
 document.getElementById('modo-3x3').addEventListener('click', () => setModoPlantio('3x3'));
 document.getElementById('modo-5x5').addEventListener('click', () => setModoPlantio('5x5'));
+document.getElementById('modo-descoberta').addEventListener('click', showDiscoveryScreen);
+document.getElementById('voltar-descoberta').addEventListener('click', showGameLayout);
+document.getElementById('arvore-descoberta').addEventListener('click', clicarArvore);
+document.getElementById('evoluir-plantacao').addEventListener('click', evoluirPlantacao);
 
 document.getElementById('upgrade-velocidade-5s').addEventListener('click', () => {
     if (moedas >= COSTO_UPGRADE_5S) {

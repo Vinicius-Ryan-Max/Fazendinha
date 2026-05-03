@@ -97,6 +97,70 @@ body {
     display: none;
 }
 
+#tela-descoberta {
+    display: none;
+    width: 100%;
+    max-width: 1000px;
+    background: #2c1f12;
+    border: 2px solid #5d4037;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+    box-sizing: border-box;
+}
+
+#tela-descoberta button {
+    background: linear-gradient(180deg, #5d4037 0%, #4e342e 100%);
+    border: 2px solid #5d4037;
+    color: #f1c40f;
+    border-radius: 14px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+#descoberta-conteudo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+#arvore-descoberta {
+    width: 240px;
+    height: auto;
+    cursor: pointer;
+    border: 3px solid #f1c40f;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    background: #1a1a1a;
+}
+
+#barra-evolucao-container {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#barra-evolucao {
+    width: 100%;
+    height: 20px;
+    accent-color: #f1c40f;
+    border-radius: 12px;
+}
+
+#textos-evolucao {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    font-size: 1rem;
+    color: #f1c40f;
+}
+
 canvas {
     display: block;
     max-width: 100%;

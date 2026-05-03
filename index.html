@@ -6,33 +6,52 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="main-container">
-        <canvas id="gameCanvas" width="600" height="400"></canvas>
-        <div id="ui-side-panel">
-            <div id="status-panel">
-                <div class="stats">Moedas: <span id="moedas">0</span></div>
-                <div class="stats">Sementes: <span id="sementes">5</span></div>
-                <div class="stats">Modo: <span id="modo-plantio">Normal</span></div>
-                <div class="stats">Fazenda: <span id="fazenda-tamanho">8x12</span></div>
-                <div class="stats">Crescimento: <span id="tempo-cultivo">30s</span></div>
-            </div>
-            <div id="shop-grid">
-                <button id="comprar-semente">Comprar Semente</button>
-                <button id="comprar-3x3">Habilidade 3x3</button>
-                <button id="comprar-5x5">Habilidade 5x5</button>
-                <button id="upgrade-velocidade-5s">Comprar -5s</button>
-                <button id="upgrade-velocidade-10s">Comprar -10s</button>
-                <button id="expandir-fazenda">Expandir Fazenda</button>
-                <div id="mode-panel">
-                    <button id="modo-normal">Modo Normal</button>
-                    <button id="modo-3x3">Modo 3x3</button>
-                    <button id="modo-5x5">Modo 5x5</button>
+    <div id="game-layout">
+        <div id="main-container">
+            <canvas id="gameCanvas" width="600" height="400"></canvas>
+            <div id="ui-side-panel">
+                <div id="status-panel">
+                    <div class="stats">Moedas: <span id="moedas">0</span></div>
+                    <div class="stats">Sementes: <span id="sementes">5</span></div>
+                    <div class="stats">Modo: <span id="modo-plantio">Normal</span></div>
+                    <div class="stats">Fazenda: <span id="fazenda-tamanho">8x12</span></div>
+                    <div class="stats">Crescimento: <span id="tempo-cultivo">30s</span></div>
                 </div>
-                <button class="shop-placeholder" disabled>Em breve</button>
-                <button class="shop-placeholder" disabled>Em breve</button>
-                <button class="shop-placeholder" disabled>Em breve</button>
-                <button class="shop-placeholder" disabled>Em breve</button>
-                <button class="shop-placeholder" disabled>Em breve</button>
+                <div id="shop-grid">
+                    <button id="comprar-semente">Comprar Semente</button>
+                    <button id="comprar-3x3">Habilidade 3x3</button>
+                    <button id="comprar-5x5">Habilidade 5x5</button>
+                    <button id="upgrade-velocidade-5s">Comprar -5s</button>
+                    <button id="upgrade-velocidade-10s">Comprar -10s</button>
+                    <button id="expandir-fazenda">Expandir Fazenda</button>
+                    <button id="modo-descoberta">Modo Descoberta</button>
+                    <div id="mode-panel">
+                        <button id="modo-normal">Modo Normal</button>
+                        <button id="modo-3x3">Modo 3x3</button>
+                        <button id="modo-5x5">Modo 5x5</button>
+                    </div>
+                    <button class="shop-placeholder" disabled>Em breve</button>
+                    <button class="shop-placeholder" disabled>Em breve</button>
+                    <button class="shop-placeholder" disabled>Em breve</button>
+                    <button class="shop-placeholder" disabled>Em breve</button>
+                    <button class="shop-placeholder" disabled>Em breve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tela-descoberta" class="hidden-screen">
+        <button id="voltar-descoberta">Voltar</button>
+        <div id="descoberta-conteudo">
+            <img id="arvore-descoberta" src="img/arvore.png" alt="Árvore da Evolução">
+            <div id="barra-evolucao-container">
+                <label for="barra-evolucao">Progresso da Evolução</label>
+                <progress id="barra-evolucao" max="100" value="0"></progress>
+            </div>
+            <button id="evoluir-plantacao">Evoluir Plantação</button>
+            <div id="textos-evolucao">
+                <div>Nível de Evolução: <span id="nivel-evolucao">0</span></div>
+                <div>Nível da Plantação: <span id="nivel-plantacao">1</span></div>
             </div>
         </div>
     </div>
