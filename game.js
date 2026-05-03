@@ -61,12 +61,17 @@ function init() {
     }
 }
 
-function onImageLoad() {
+function onImageLoad(imageName) {
     imagesLoaded++;
+    console.log(`Imagem carregada com sucesso: ${imageName}`);
     if (imagesLoaded === totalImages) {
         gramaPattern = ctx.createPattern(imgGrama, 'repeat');
         startGame();
     }
+}
+
+function onImageError(imageName, event) {
+    console.error(`Falha ao carregar imagem: ${imageName}`, event);
 }
 
 function startGame() {
@@ -76,12 +81,16 @@ function startGame() {
 }
 
 function loadImages() {
-    imgGrama.onload = onImageLoad;
-    imgTerra.onload = onImageLoad;
-    imgPlantaP.onload = onImageLoad;
-    imgPlantaG.onload = onImageLoad;
+    imgGrama.onload = () => onImageLoad('img/grama.png');
+    imgGrama.onerror = (event) => onImageError('img/grama.png', event);
+    imgTerra.onload = () => onImageLoad('img/Terra.png');
+    imgTerra.onerror = (event) => onImageError('img/Terra.png', event);
+    imgPlantaP.onload = () => onImageLoad('img/PlantaP.png');
+    imgPlantaP.onerror = (event) => onImageError('img/PlantaP.png', event);
+    imgPlantaG.onload = () => onImageLoad('img/PlantaG.png');
+    imgPlantaG.onerror = (event) => onImageError('img/PlantaG.png', event);
     imgGrama.src = 'img/grama.png';
-    imgTerra.src = 'img/terra.png';
+    imgTerra.src = 'img/Terra.png';
     imgPlantaP.src = 'img/PlantaP.png';
     imgPlantaG.src = 'img/PlantaG.png';
 }
