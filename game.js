@@ -1,7 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-const TILE_SIZE = 50; // Cada quadrado terá 50x50
+let TILE_SIZE = 50; // Cada quadrado terá 50x50
 let rows = 8;
 let cols = 12;
 
@@ -52,6 +52,30 @@ function atualizarUI() {
 
 function getTempoCrescimento() {
     return Math.max(5000, Math.round(TEMPO_CRESCIMENTO_BASE / modificadorVelocidade));
+}
+
+function ajustarCanvasResponsivo() {
+    if (window.innerWidth < 600) {
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        const availableWidth = Math.max(300, window.innerWidth - 40);
+        const newSize = Math.max(25, Math.floor(availableWidth / cols));
+        TILE_SIZE = newSize;
+    } else {
+        canvas.style.width = 'auto';
+        canvas.style.height = 'auto';
+        TILE_SIZE = 50;
+    }
+
+    canvas.width = cols * TILE_SIZE;
+    canvas.height = rows * TILE_SIZE;
+
+    grid.forEach((tile, index) => {
+        const r = Math.floor(index / cols);
+        const c = index % cols;
+        tile.x = c * TILE_SIZE;
+        tile.y = r * TILE_SIZE;
+    });
 }
 
 function getPontosParaProximoNivel(level) {
@@ -165,6 +189,7 @@ function onImageError(imageName, event) {
 
 function startGame() {
     init();
+    ajustarCanvasResponsivo();
     atualizarUI();
     draw();
 }
@@ -454,5 +479,7 @@ document.getElementById('upgrade-velocidade-10s').addEventListener('click', () =
 });
 
 document.getElementById('expandir-fazenda').addEventListener('click', expandirFazenda);
+
+window.addEventListener('resize', ajustarCanvasResponsivo);
 
 loadImages();

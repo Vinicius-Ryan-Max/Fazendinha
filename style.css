@@ -172,3 +172,31 @@ canvas {
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     border-radius: 20px;
 }
+
+@media (max-width: 768px) {
+    #main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #ui-side-panel {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #shop-grid {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+
+    #shop-grid button,
+    #mode-panel button,
+    #tela-descoberta button {
+        padding: 16px 18px;
+        font-size: 1.05rem;
+    }
+
+    #tela-descoberta {
+        padding: 28px;
+    }
+}
