@@ -16,6 +16,9 @@ let custoExpandirFazenda = 250;
 let expandirParaColuna = true;
 let habilidade3x3Comprada = false;
 let habilidade5x5Comprada = false;
+let autoClickers = 0;
+let custoAutoClicker = 50;
+let isInDiscovery = false;
 
 const COSTO_HABILIDADE_3X3 = 50;
 const COSTO_HABILIDADE_5X5 = 100;
@@ -47,6 +50,15 @@ function atualizarUI() {
     document.getElementById('upgrade-velocidade-5s').textContent = `Comprar -5s (${COSTO_UPGRADE_5S} moedas)`;
     document.getElementById('upgrade-velocidade-10s').textContent = `Comprar -10s (${COSTO_UPGRADE_10S} moedas)`;
     document.getElementById('expandir-fazenda').textContent = `Expandir Fazenda (${custoExpandirFazenda} moedas)`;
+
+    // Disable buttons if not enough money
+    document.getElementById('comprar-semente').disabled = moedas < custoSemente;
+    document.getElementById('comprar-3x3').disabled = habilidade3x3Comprada || moedas < COSTO_HABILIDADE_3X3;
+    document.getElementById('comprar-5x5').disabled = habilidade5x5Comprada || moedas < COSTO_HABILIDADE_5X5;
+    document.getElementById('upgrade-velocidade-5s').disabled = moedas < COSTO_UPGRADE_5S;
+    document.getElementById('upgrade-velocidade-10s').disabled = moedas < COSTO_UPGRADE_10S;
+    document.getElementById('expandir-fazenda').disabled = moedas < custoExpandirFazenda;
+
     atualizarEvolucaoUI();
 }
 
@@ -62,13 +74,12 @@ function ajustarCanvasResponsivo() {
         const newSize = Math.max(25, Math.floor(availableWidth / cols));
         TILE_SIZE = newSize;
     } else {
-        canvas.style.width = 'auto';
+        canvas.style.width = '100%';
         canvas.style.height = 'auto';
-        TILE_SIZE = 50;
+        TILE_SIZE = 60;
     }
 
-    canvas.width = cols * TILE_SIZE;
-    canvas.height = rows * TILE_SIZE;
+    ajustarTamanhoCanvas();
 
     grid.forEach((tile, index) => {
         const r = Math.floor(index / cols);
@@ -76,6 +87,11 @@ function ajustarCanvasResponsivo() {
         tile.x = c * TILE_SIZE;
         tile.y = r * TILE_SIZE;
     });
+}
+
+function ajustarTamanhoCanvas() {
+    canvas.width = cols * TILE_SIZE;
+    canvas.height = rows * TILE_SIZE;
 }
 
 function getPontosParaProximoNivel(level) {
@@ -110,20 +126,46 @@ function atualizarEvolucaoUI() {
     if (nivelPlantacaoEl) {
         nivelPlantacaoEl.textContent = nivelPlantacao;
     }
+    const btnAjudante = document.getElementById('comprar-ajudante');
+    if (btnAjudante) {
+        btnAjudante.textContent = `Comprar Ajudante (${custoAutoClicker} moedas) - ${autoClickers}x`;
+        btnAjudante.disabled = moedas < custoAutoClicker;
+    }
 }
 
 function showDiscoveryScreen() {
     document.getElementById('game-layout').style.display = 'none';
     document.getElementById('tela-descoberta').style.display = 'block';
+    isInDiscovery = true;
 }
 
 function showGameLayout() {
     document.getElementById('tela-descoberta').style.display = 'none';
     document.getElementById('game-layout').style.display = 'block';
+    isInDiscovery = false;
 }
 
-function clicarArvore() {
-    cliquesArvore++;
+function mostraEfeito(quantidade) {
+    const tree = document.getElementById('arvore-descoberta');
+    const tela = document.getElementById('tela-descoberta');
+    if (!tree || !tela) return;
+    const treeRect = tree.getBoundingClientRect();
+    const telaRect = tela.getBoundingClientRect();
+    const plusOne = document.createElement('div');
+    plusOne.textContent = `+${quantidade}`;
+    plusOne.className = 'plus-one';
+    plusOne.style.left = (treeRect.left - telaRect.left + treeRect.width / 2 - 12) + 'px';
+    plusOne.style.top = (treeRect.top - telaRect.top - 10) + 'px';
+    tela.appendChild(plusOne);
+    setTimeout(() => {
+        plusOne.remove();
+    }, 1000);
+}
+
+function clicarArvore(quantidade = 1) {
+    cliquesArvore += quantidade;
+    mostraEfeito(quantidade);
+
     if (cliquesArvore >= 100) {
         cliquesArvore = 0;
         pontosEvolucao++;
@@ -191,6 +233,13 @@ function startGame() {
     init();
     ajustarCanvasResponsivo();
     atualizarUI();
+    setModoPlantio('normal');
+    // Start auto clicker interval
+    setInterval(() => {
+        if (isInDiscovery && autoClickers > 0) {
+            clicarArvore(autoClickers);
+        }
+    }, 1000);
     draw();
 }
 
@@ -281,15 +330,10 @@ function expandirFazenda() {
     const newCols = expandirParaColuna ? cols + 1 : cols;
     expandirParaColuna = !expandirParaColuna;
 
-    if (newCols !== cols) {
-        canvas.width = newCols * TILE_SIZE;
-    }
-    if (newRows !== rows) {
-        canvas.height = newRows * TILE_SIZE;
-    }
-
     rows = newRows;
     cols = newCols;
+
+    ajustarTamanhoCanvas();
 
     const newGrid = [];
     for (let r = 0; r < rows; r++) {
@@ -349,6 +393,12 @@ function draw() {
 
 function setModoPlantio(modo) {
     modoPlantio = modo;
+    // Remove selected from all mode buttons
+    document.getElementById('modo-normal').classList.remove('selected-mode');
+    document.getElementById('modo-3x3').classList.remove('selected-mode');
+    document.getElementById('modo-5x5').classList.remove('selected-mode');
+    // Add to current
+    document.getElementById('modo-' + modo).classList.add('selected-mode');
     atualizarUI();
 }
 
@@ -454,6 +504,9 @@ document.getElementById('modo-normal').addEventListener('click', () => setModoPl
 document.getElementById('modo-3x3').addEventListener('click', () => setModoPlantio('3x3'));
 document.getElementById('modo-5x5').addEventListener('click', () => setModoPlantio('5x5'));
 document.getElementById('modo-descoberta').addEventListener('click', showDiscoveryScreen);
+document.getElementById('shop-toggle').addEventListener('click', () => {
+    document.getElementById('shop-panel').classList.toggle('open');
+});
 document.getElementById('voltar-descoberta').addEventListener('click', showGameLayout);
 const arvoreDescoberta = document.getElementById('arvore-descoberta');
 arvoreDescoberta.addEventListener('click', () => {
@@ -463,7 +516,14 @@ arvoreDescoberta.addEventListener('click', () => {
 arvoreDescoberta.addEventListener('animationend', () => {
     arvoreDescoberta.classList.remove('pulse');
 });
-document.getElementById('evoluir-plantacao').addEventListener('click', evoluirPlantacao);
+document.getElementById('comprar-ajudante').addEventListener('click', () => {
+    if (moedas < custoAutoClicker) return;
+
+    moedas -= custoAutoClicker;
+    autoClickers++;
+    custoAutoClicker = Math.round(custoAutoClicker * 1.5);
+    atualizarUI();
+});
 
 document.getElementById('upgrade-velocidade-5s').addEventListener('click', () => {
     if (moedas >= COSTO_UPGRADE_5S) {

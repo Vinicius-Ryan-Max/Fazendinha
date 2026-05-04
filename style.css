@@ -20,22 +20,83 @@ body {
     justify-content: center;
 }
 
-#ui-side-panel {
-    width: 320px;
+#status-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     background: #2c1f12;
-    border: 2px solid #5d4037;
-    border-radius: 20px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+    border-bottom: 2px solid #5d4037;
+    z-index: 1000;
+    padding: 14px 24px;
+    box-sizing: border-box;
 }
 
 #status-panel {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
+}
+
+#shop-panel {
+    position: fixed;
+    top: 100px;
+    right: -340px;
+    width: 320px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    background: #2c1f12;
+    border: 2px solid #5d4037;
+    border-radius: 20px 0 0 20px;
+    padding: 20px;
+    box-shadow: -15px 15px 40px rgba(0,0,0,0.45);
+    transition: right 0.3s ease;
+    z-index: 900;
+}
+
+#shop-panel.open {
+    right: 0;
+}
+
+#shop-toggle {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    z-index: 1100;
+    background: #f1c40f;
+    color: #1a1a1a;
+    border: 2px solid #5d4037;
+    border-radius: 14px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 1rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+#shop-toggle:hover {
+    transform: translateY(-1px);
+    background: #f7d85c;
+}
+
+#main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    width: 100%;
+    max-width: 1200px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+#game-layout {
+    margin-top: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 100px);
 }
 
 #status-panel .stats {
@@ -87,10 +148,15 @@ body {
 }
 
 #shop-grid button:disabled {
-    opacity: 0.45;
+    opacity: 0.5;
     cursor: not-allowed;
     background: #3e2723;
     border-color: #3e2723;
+}
+
+.selected-mode {
+    border: 2px solid #f1c40f !important;
+    box-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
 }
 
 #ui-container {
@@ -107,6 +173,7 @@ body {
     padding: 24px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
     box-sizing: border-box;
+    position: relative;
 }
 
 #tela-descoberta button {
@@ -165,7 +232,24 @@ body {
 #barra-evolucao {
     width: 100%;
     height: 20px;
-    accent-color: #f1c40f;
+    accent-color: #2ecc71;
+    border-radius: 12px;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+#barra-evolucao::-webkit-progress-bar {
+    background: #ddd;
+    border-radius: 12px;
+}
+
+#barra-evolucao::-webkit-progress-value {
+    background: linear-gradient(to right, #2ecc71, #27ae60);
+    border-radius: 12px;
+}
+
+#barra-evolucao::-moz-progress-bar {
+    background: linear-gradient(to right, #2ecc71, #27ae60);
     border-radius: 12px;
 }
 
@@ -180,8 +264,9 @@ body {
 
 canvas {
     display: block;
-    max-width: 100%;
-    width: auto;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
     height: auto;
     background-color: #2ecc71;
     border: 4px solid #34495e;
@@ -215,5 +300,25 @@ canvas {
 
     #tela-descoberta {
         padding: 28px;
+    }
+}
+
+.plus-one {
+    position: absolute;
+    color: #f1c40f;
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: none;
+    animation: rise-fade 1s ease-out forwards;
+}
+
+@keyframes rise-fade {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
     }
 }
