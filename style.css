@@ -27,7 +27,7 @@ body {
     right: 0;
     background: rgba(44, 31, 18, 0.95);
     border-bottom: 2px solid #5d4037;
-    z-index: 1000;
+    z-index: 9999;
     padding: 14px 24px;
     box-sizing: border-box;
     backdrop-filter: blur(4px);
@@ -276,52 +276,54 @@ canvas {
     border-radius: 20px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     #status-bar {
-        top: 0;
-        padding: 10px 14px;
+        top: 0 !important;
+        padding: 10px 14px !important;
+        position: fixed !important;
     }
 
     #status-panel {
-        font-size: 0.85rem;
+        font-size: 0.85rem !important;
     }
 
     #status-panel .stats {
-        padding: 8px 10px;
-        font-size: 0.85rem;
+        padding: 8px 10px !important;
+        font-size: 0.85rem !important;
     }
 
     #game-layout {
-        margin-top: 80px;
+        margin-top: 80px !important;
+        flex-direction: column !important;
     }
 
     #main-container {
-        flex-direction: column;
-        align-items: center;
-        padding-bottom: 100px;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding-bottom: 100px !important;
     }
 
     #ui-side-panel {
-        width: 100%;
-        max-width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
     #shop-grid {
-        width: 100%;
-        grid-template-columns: repeat(2, 1fr);
+        width: 100% !important;
+        grid-template-columns: repeat(2, 1fr) !important;
     }
 
     #shop-grid button,
     #mode-panel button,
     #tela-descoberta button {
-        padding: 14px 10px;
-        font-size: 0.9rem;
+        padding: 14px 10px !important;
+        font-size: 0.9rem !important;
     }
 
     #tela-descoberta {
-        padding: 20px;
-        margin-top: 80px;
-        padding-bottom: 100px;
+        padding: 20px !important;
+        margin-top: 80px !important;
+        padding-bottom: 100px !important;
     }
 }
 
