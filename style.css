@@ -7,6 +7,7 @@ body {
     margin: 0;
     color: white;
     font-family: 'Courier New', Courier, monospace;
+    overflow-x: hidden;
 }
 
 #main-container {
@@ -28,24 +29,24 @@ body {
     background: rgba(44, 31, 18, 0.95);
     border-bottom: 2px solid #5d4037;
     z-index: 9999;
-    padding: 14px 24px;
+    padding: 5px 10px;
     box-sizing: border-box;
     backdrop-filter: blur(4px);
 }
 
-#status-panel {
+.header-status {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 12px;
+    gap: 5px;
 }
 
 #shop-panel {
     position: fixed;
-    top: 100px;
-    right: -340px;
+    top: 50px;
+    right: -100%;
     width: 320px;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 70px);
     overflow-y: auto;
     background: #2c1f12;
     border: 2px solid #5d4037;
@@ -62,9 +63,9 @@ body {
 
 #shop-toggle {
     position: fixed;
+    bottom: 20px;
     right: 20px;
-    top: 20px;
-    z-index: 1100;
+    z-index: 1000;
     background: #f1c40f;
     color: #1a1a1a;
     border: 2px solid #5d4037;
@@ -93,20 +94,21 @@ body {
 }
 
 #game-layout {
-    margin-top: 100px;
+    margin-top: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 100px);
+    min-height: calc(100vh - 50px);
 }
 
-#status-panel .stats {
+.stats {
     background: rgba(241, 196, 15, 0.12);
     border: 1px solid rgba(241, 196, 15, 0.25);
-    border-radius: 12px;
-    padding: 12px 14px;
+    border-radius: 8px;
+    padding: 5px 10px;
     color: #f1c40f;
     font-weight: bold;
+    font-size: 12px;
 }
 
 #shop-grid {
@@ -279,22 +281,26 @@ canvas {
 @media (max-width: 600px) {
     #status-bar {
         top: 0 !important;
-        padding: 10px 14px !important;
+        padding: 5px 10px !important;
         position: fixed !important;
     }
 
-    #status-panel {
+    .header-status {
         font-size: 0.85rem !important;
     }
 
-    #status-panel .stats {
-        padding: 8px 10px !important;
-        font-size: 0.85rem !important;
+    .header-status .stats {
+        padding: 4px 8px !important;
+        font-size: 11px !important;
     }
 
     #game-layout {
-        margin-top: 80px !important;
+        margin-top: 50px !important;
         flex-direction: column !important;
+    }
+
+    canvas {
+        margin-top: 10px !important;
     }
 
     #main-container {
@@ -322,7 +328,7 @@ canvas {
 
     #tela-descoberta {
         padding: 20px !important;
-        margin-top: 80px !important;
+        margin-top: 50px !important;
         padding-bottom: 100px !important;
     }
 }
