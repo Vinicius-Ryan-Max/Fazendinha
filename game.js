@@ -19,6 +19,9 @@ let habilidade5x5Comprada = false;
 let autoClickers = 0;
 let custoAutoClicker = 50;
 let isInDiscovery = false;
+let habilidadeFazendaCompletaDesbloqueada = false;
+let cliquesUltimoEmBreve = 0;
+const CLIQUES_PARA_EASTER_EGG = 69;
 
 const COSTO_HABILIDADE_3X3 = 50;
 const COSTO_HABILIDADE_5X5 = 100;
@@ -43,7 +46,7 @@ function atualizarUI() {
     document.getElementById('sementes').textContent = sementes;
     document.getElementById('fazenda-tamanho').textContent = `${rows}x${cols}`;
     document.getElementById('tempo-cultivo').textContent = `${getTempoCrescimento() / 1000}s`;
-    document.getElementById('modo-plantio').textContent = modoPlantio === 'normal' ? 'Normal' : modoPlantio === '3x3' ? '3x3' : '5x5';
+    document.getElementById('modo-plantio').textContent = modoPlantio === 'normal' ? 'Normal' : modoPlantio === '3x3' ? '3x3' : modoPlantio === '5x5' ? '5x5' : 'Fazenda Total';
     document.getElementById('comprar-semente').textContent = `Comprar Semente (${custoSemente} moedas)`;
     document.getElementById('comprar-3x3').textContent = habilidade3x3Comprada ? 'Habilidade 3x3 Comprada' : `Comprar Habilidade 3x3 (${COSTO_HABILIDADE_3X3} moedas)`;
     document.getElementById('comprar-5x5').textContent = habilidade5x5Comprada ? 'Habilidade 5x5 Comprada' : `Comprar Habilidade 5x5 (${COSTO_HABILIDADE_5X5} moedas)`;
@@ -58,6 +61,7 @@ function atualizarUI() {
     document.getElementById('upgrade-velocidade-5s').disabled = moedas < COSTO_UPGRADE_5S;
     document.getElementById('upgrade-velocidade-10s').disabled = moedas < COSTO_UPGRADE_10S;
     document.getElementById('expandir-fazenda').disabled = moedas < custoExpandirFazenda;
+    document.getElementById('modo-fazenda').style.display = habilidadeFazendaCompletaDesbloqueada ? 'block' : 'none';
 
     atualizarEvolucaoUI();
 }
@@ -160,6 +164,57 @@ function mostraEfeito(quantidade) {
     setTimeout(() => {
         plusOne.remove();
     }, 1000);
+}
+
+function mostrarOverlayEasterEgg(mensagem) {
+    const overlay = document.getElementById('easter-egg-overlay');
+    if (!overlay) return;
+    overlay.textContent = mensagem;
+    overlay.classList.add('visible');
+    setTimeout(() => {
+        overlay.classList.remove('visible');
+    }, 5000);
+}
+
+function processarFazendaInteira() {
+    let actions = 0;
+    const tilesParaPlantar = [];
+
+    grid.forEach(tile => {
+        if (tile.state === 'grama') {
+            tile.state = 'terra';
+            actions++;
+        } else if (tile.state === 'terra') {
+            if (sementes <= 0) return;
+            tile.state = 'semente';
+            sementes--;
+            actions++;
+            tilesParaPlantar.push(tile);
+        } else if (tile.state === 'colheita') {
+            tile.state = 'terra';
+            moedas += Math.round(10 * multiplicadorNivel);
+            sementes += 1;
+            actions++;
+        }
+    });
+
+    tilesParaPlantar.forEach(tile => {
+        setTimeout(() => {
+            if (tile.state === 'semente') {
+                tile.state = 'colheita';
+            }
+        }, getTempoCrescimento());
+    });
+
+    return actions;
+}
+
+function ativarEasterEggFazenda() {
+    if (habilidadeFazendaCompletaDesbloqueada) return;
+    habilidadeFazendaCompletaDesbloqueada = true;
+    document.getElementById('modo-fazenda').style.display = 'block';
+    mostrarOverlayEasterEgg('Seu Safadinho(a)');
+    alert('Easter egg desbloqueado! Agora você tem a habilidade Fazenda Total para processar toda a plantação com um clique.');
 }
 
 function clicarArvore(quantidade = 1) {
@@ -397,6 +452,7 @@ function setModoPlantio(modo) {
     document.getElementById('modo-normal').classList.remove('selected-mode');
     document.getElementById('modo-3x3').classList.remove('selected-mode');
     document.getElementById('modo-5x5').classList.remove('selected-mode');
+    document.getElementById('modo-fazenda').classList.remove('selected-mode');
     // Add to current
     document.getElementById('modo-' + modo).classList.add('selected-mode');
     atualizarUI();
@@ -414,6 +470,19 @@ canvas.addEventListener('click', (e) => {
     const index = row * cols + col;
     const tile = grid[index];
     if (!tile) return;
+
+    if (modoPlantio === 'fazenda') {
+        if (!habilidadeFazendaCompletaDesbloqueada) {
+            alert('Modo Fazenda não está disponível ainda.');
+            return;
+        }
+        const actions = processarFazendaInteira();
+        if (actions === 0) {
+            alert('Não há ações disponíveis em toda a fazenda.');
+        }
+        atualizarUI();
+        return;
+    }
 
     if (modoPlantio === '3x3') {
         if (!habilidade3x3Comprada) {
@@ -503,6 +572,14 @@ document.getElementById('comprar-5x5').addEventListener('click', () => {
 document.getElementById('modo-normal').addEventListener('click', () => setModoPlantio('normal'));
 document.getElementById('modo-3x3').addEventListener('click', () => setModoPlantio('3x3'));
 document.getElementById('modo-5x5').addEventListener('click', () => setModoPlantio('5x5'));
+document.getElementById('modo-fazenda').addEventListener('click', () => setModoPlantio('fazenda'));
+document.getElementById('easter-egg-trigger').addEventListener('click', () => {
+    if (habilidadeFazendaCompletaDesbloqueada) return;
+    cliquesUltimoEmBreve++;
+    if (cliquesUltimoEmBreve >= CLIQUES_PARA_EASTER_EGG) {
+        ativarEasterEggFazenda();
+    }
+});
 document.getElementById('modo-descoberta').addEventListener('click', showDiscoveryScreen);
 document.getElementById('shop-toggle').addEventListener('click', () => {
     document.getElementById('shop-panel').classList.toggle('open');

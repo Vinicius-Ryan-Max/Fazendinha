@@ -157,6 +157,20 @@ body {
     border-color: #3e2723;
 }
 
+#easter-egg-trigger {
+    opacity: 0.5;
+    cursor: default;
+    background: #3e2723;
+    border-color: #3e2723;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
+    pointer-events: auto;
+}
+
+#easter-egg-trigger:hover {
+    background: #3e2723;
+    cursor: default;
+}
+
 .selected-mode {
     border: 2px solid #f1c40f !important;
     box-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
@@ -352,4 +366,27 @@ canvas {
         opacity: 0;
         transform: translateY(-50px);
     }
+}
+
+#easter-egg-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    color: #f1c40f;
+    font-size: clamp(3rem, 7vw, 6rem);
+    text-align: center;
+    font-weight: bold;
+    z-index: 99999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    padding: 20px;
+}
+
+#easter-egg-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
 }
