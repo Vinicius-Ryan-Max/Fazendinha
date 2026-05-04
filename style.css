@@ -25,11 +25,12 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    background: #2c1f12;
+    background: rgba(44, 31, 18, 0.95);
     border-bottom: 2px solid #5d4037;
     z-index: 1000;
     padding: 14px 24px;
     box-sizing: border-box;
+    backdrop-filter: blur(4px);
 }
 
 #status-panel {
@@ -276,9 +277,28 @@ canvas {
 }
 
 @media (max-width: 768px) {
+    #status-bar {
+        top: 0;
+        padding: 10px 14px;
+    }
+
+    #status-panel {
+        font-size: 0.85rem;
+    }
+
+    #status-panel .stats {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+
+    #game-layout {
+        margin-top: 80px;
+    }
+
     #main-container {
         flex-direction: column;
         align-items: center;
+        padding-bottom: 100px;
     }
 
     #ui-side-panel {
@@ -288,20 +308,23 @@ canvas {
 
     #shop-grid {
         width: 100%;
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 
     #shop-grid button,
     #mode-panel button,
     #tela-descoberta button {
-        padding: 16px 18px;
-        font-size: 1.05rem;
+        padding: 14px 10px;
+        font-size: 0.9rem;
     }
 
     #tela-descoberta {
-        padding: 28px;
+        padding: 20px;
+        margin-top: 80px;
+        padding-bottom: 100px;
     }
 }
+
 
 .plus-one {
     position: absolute;
