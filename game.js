@@ -6,6 +6,7 @@ let rows = 8;
 let cols = 12;
 
 let grid = [];
+let lastFrameTimestamp = null;
 let modoPlantio = 'normal';
 let moedas = 5; // valor inicial para testes
 let sementes = 5;
@@ -68,6 +69,15 @@ function atualizarUI() {
 
 function getTempoCrescimento() {
     return Math.max(5000, Math.round(TEMPO_CRESCIMENTO_BASE / modificadorVelocidade));
+}
+
+function criarTile(r, c, state = 'grama') {
+    return {
+        x: c * TILE_SIZE,
+        y: r * TILE_SIZE,
+        state,
+        tempoCrescimento: 0
+    };
 }
 
 function ajustarCanvasResponsivo() {
@@ -186,7 +196,7 @@ function processarFazendaInteira() {
             actions++;
         } else if (tile.state === 'terra') {
             if (sementes <= 0) return;
-            tile.state = 'semente';
+            plantarTile(tile);
             sementes--;
             actions++;
             tilesParaPlantar.push(tile);
@@ -196,14 +206,6 @@ function processarFazendaInteira() {
             sementes += 1;
             actions++;
         }
-    });
-
-    tilesParaPlantar.forEach(tile => {
-        setTimeout(() => {
-            if (tile.state === 'semente') {
-                tile.state = 'colheita';
-            }
-        }, getTempoCrescimento());
     });
 
     return actions;
@@ -262,11 +264,7 @@ function init() {
     grid = [];
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-            grid.push({
-                x: c * TILE_SIZE,
-                y: r * TILE_SIZE,
-                state: 'grama' // grama, terra, semente, colheita
-            });
+            grid.push(criarTile(r, c, 'grama'));
         }
     }
 }
@@ -295,7 +293,7 @@ function startGame() {
             clicarArvore(autoClickers);
         }
     }, 1000);
-    draw();
+    requestAnimationFrame(draw);
 }
 
 function loadImages() {
@@ -315,11 +313,7 @@ function loadImages() {
 
 function plantarTile(tile) {
     tile.state = 'semente';
-    setTimeout(() => {
-        if (tile.state === 'semente') {
-            tile.state = 'colheita';
-        }
-    }, getTempoCrescimento());
+    tile.tempoCrescimento = 0;
 }
 
 function processarArea(centerCol, centerRow, radius) {
@@ -342,14 +336,9 @@ function processarArea(centerCol, centerRow, radius) {
                 actions++;
             } else if (actionType === 'terra' && tile.state === 'terra') {
                 if (sementes <= 0) return actions;
-                tile.state = 'semente';
+                plantarTile(tile);
                 sementes--;
                 actions++;
-                setTimeout(() => {
-                    if (tile.state === 'semente') {
-                        tile.state = 'colheita';
-                    }
-                }, getTempoCrescimento());
             } else if (actionType === 'colheita' && tile.state === 'colheita') {
                 tile.state = 'terra';
                 moedas += Math.round(10 * multiplicadorNivel);
@@ -395,17 +384,10 @@ function expandirFazenda() {
         for (let c = 0; c < cols; c++) {
             if (r < oldRows && c < oldCols) {
                 const oldTile = grid[r * oldCols + c];
-                newGrid.push({
-                    x: c * TILE_SIZE,
-                    y: r * TILE_SIZE,
-                    state: oldTile.state
-                });
+                newGrid.push(criarTile(r, c, oldTile.state));
+                newGrid[newGrid.length - 1].tempoCrescimento = oldTile.tempoCrescimento || 0;
             } else {
-                newGrid.push({
-                    x: c * TILE_SIZE,
-                    y: r * TILE_SIZE,
-                    state: 'grama'
-                });
+                newGrid.push(criarTile(r, c, 'grama'));
             }
         }
     }
@@ -413,7 +395,37 @@ function expandirFazenda() {
     atualizarUI();
 }
 
-function draw() {
+function atualizarCrescimento(timestamp, delta) {
+    const grade = [];
+    let index = 0;
+
+    for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < cols; c++) {
+            row.push(grid[index++]);
+        }
+        grade.push(row);
+    }
+
+    for (let i = 0; i < grade.length; i++) {
+        for (let j = 0; j < grade[i].length; j++) {
+            const tile = grade[i][j];
+            if (tile.state === 'semente') {
+                tile.tempoCrescimento += delta;
+                if (tile.tempoCrescimento >= getTempoCrescimento()) {
+                    tile.state = 'colheita';
+                    tile.tempoCrescimento = 0;
+                }
+            }
+        }
+    }
+}
+
+function draw(timestamp) {
+    const deltaTime = lastFrameTimestamp === null ? 0 : timestamp - lastFrameTimestamp;
+    lastFrameTimestamp = timestamp;
+    atualizarCrescimento(timestamp, deltaTime);
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (gramaPattern) {
