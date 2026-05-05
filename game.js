@@ -21,6 +21,10 @@ let habilidade3x3Comprada = false;
 let habilidade5x5Comprada = false;
 let autoClickers = 0;
 let custoAutoClicker = 50;
+let multiplicadorDeLucro = 1;
+let custoFertilizante = 75;
+let comprasUpgrade5s = 0;
+let comprasUpgrade10s = 0;
 let isInDiscovery = false;
 let habilidadeFazendaCompletaDesbloqueada = false;
 let cliquesUltimoEmBreve = 0;
@@ -30,6 +34,8 @@ const COSTO_HABILIDADE_3X3 = 50;
 const COSTO_HABILIDADE_5X5 = 100;
 const COSTO_UPGRADE_5S = 100;
 const COSTO_UPGRADE_10S = 200;
+const COSTO_FERTILIZANTE = 75;
+const INCREMENTO_FERTILIZANTE = 0.2;
 
 const imgGrama = new Image();
 const imgTerra = new Image();
@@ -45,24 +51,39 @@ let multiplicadorNivel = 1;
 const MAX_NIVEL_PLANTACAO = 5;
 
 function atualizarUI() {
-    document.getElementById('moedas').textContent = moedas;
-    document.getElementById('sementes').textContent = sementes;
+    const moedaPrint = formatarNumero(moedas);
+    const sementes_print = formatarNumero(sementes);
+    const custoSementePrint = formatarNumero(custoSemente);
+    const custoFertilizantePrint = formatarNumero(custoFertilizante);
+    const custoExpandirPrint = formatarNumero(custoExpandirFazenda);
+    const custoAutoClickerPrint = formatarNumero(custoAutoClicker);
+
+    const custoUpgrade5sPrint = formatarNumero(calcularCustoUpgrade5s());
+    const custoUpgrade10sPrint = formatarNumero(calcularCustoUpgrade10s());
+
+    document.getElementById('moedas').textContent = moedaPrint;
+    document.getElementById('sementes').textContent = sementes_print;
     document.getElementById('fazenda-tamanho').textContent = `${rows}x${cols}`;
     document.getElementById('tempo-cultivo').textContent = `${getTempoCrescimento() / 1000}s`;
     document.getElementById('modo-plantio').textContent = modoPlantio === 'normal' ? 'Normal' : modoPlantio === '3x3' ? '3x3' : modoPlantio === '5x5' ? '5x5' : 'Fazenda Total';
-    document.getElementById('comprar-semente').textContent = `Comprar Semente (${custoSemente} moedas)`;
+    document.getElementById('comprar-semente').textContent = `Comprar Semente (${custoSementePrint} moedas)`;
     document.getElementById('comprar-3x3').textContent = habilidade3x3Comprada ? 'Habilidade 3x3 Comprada' : `Comprar Habilidade 3x3 (${COSTO_HABILIDADE_3X3} moedas)`;
     document.getElementById('comprar-5x5').textContent = habilidade5x5Comprada ? 'Habilidade 5x5 Comprada' : `Comprar Habilidade 5x5 (${COSTO_HABILIDADE_5X5} moedas)`;
-    document.getElementById('upgrade-velocidade-5s').textContent = `Comprar -5s (${COSTO_UPGRADE_5S} moedas)`;
-    document.getElementById('upgrade-velocidade-10s').textContent = `Comprar -10s (${COSTO_UPGRADE_10S} moedas)`;
-    document.getElementById('expandir-fazenda').textContent = `Expandir Fazenda (${custoExpandirFazenda} moedas)`;
+    document.getElementById('upgrade-velocidade-5s').textContent = `Comprar -5s (${custoUpgrade5sPrint} moedas)`;
+    document.getElementById('upgrade-velocidade-10s').textContent = `Comprar -10s (${custoUpgrade10sPrint} moedas)`;
+    document.getElementById('expandir-fazenda').textContent = `Expandir Fazenda (${custoExpandirPrint} moedas)`;
+    
+    if (document.getElementById('melhorar-fertilizante')) {
+        document.getElementById('melhorar-fertilizante').textContent = `Melhorar Fertilizante +${INCREMENTO_FERTILIZANTE}x (${custoFertilizantePrint} moedas)`;
+        document.getElementById('melhorar-fertilizante').disabled = moedas < custoFertilizante;
+    }
 
     // Disable buttons if not enough money
     document.getElementById('comprar-semente').disabled = moedas < custoSemente;
     document.getElementById('comprar-3x3').disabled = habilidade3x3Comprada || moedas < COSTO_HABILIDADE_3X3;
     document.getElementById('comprar-5x5').disabled = habilidade5x5Comprada || moedas < COSTO_HABILIDADE_5X5;
-    document.getElementById('upgrade-velocidade-5s').disabled = moedas < COSTO_UPGRADE_5S;
-    document.getElementById('upgrade-velocidade-10s').disabled = moedas < COSTO_UPGRADE_10S;
+    document.getElementById('upgrade-velocidade-5s').disabled = moedas < calcularCustoUpgrade5s();
+    document.getElementById('upgrade-velocidade-10s').disabled = moedas < calcularCustoUpgrade10s();
     document.getElementById('expandir-fazenda').disabled = moedas < custoExpandirFazenda;
     document.getElementById('modo-fazenda').style.display = habilidadeFazendaCompletaDesbloqueada ? 'block' : 'none';
 
@@ -74,13 +95,47 @@ function getTempoCrescimento() {
     return Math.max(TEMPO_CRESCIMENTO_MIN, tempoCrescimento) * 1000;
 }
 
+function formatarNumero(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+    return num.toString();
+}
+
+function calcularValorColheita() {
+    const base = 10;
+    return Math.round(base * nivelPlantacao * 1.5 * multiplicadorDeLucro);
+}
+
+function calcularCustoUpgrade5s() {
+    return Math.ceil(COSTO_UPGRADE_5S * Math.pow(1.5, comprasUpgrade5s));
+}
+
+function calcularCustoUpgrade10s() {
+    return Math.ceil(COSTO_UPGRADE_10S * Math.pow(1.5, comprasUpgrade10s));
+}
+
 function salvarJogo() {
     try {
         const saveData = {
             moedas,
             sementes,
             autoClickers,
+            custoAutoClicker,
             tempoCrescimento,
+            comprasUpgrade5s,
+            comprasUpgrade10s,
+            multiplicadorDeLucro,
+            custoFertilizante,
+            custoSemente,
+            custoExpandirFazenda,
+            nivelPlantacao,
+            habilidade3x3Comprada,
+            habilidade5x5Comprada,
+            habilidadeFazendaCompletaDesbloqueada,
             rows,
             cols,
             grid: grid.map(tile => ({ state: tile.state, tempoCrescimento: tile.tempoCrescimento }))
@@ -103,7 +158,18 @@ function carregarJogo() {
         moedas = Number(data.moedas) || moedas;
         sementes = Number(data.sementes) || sementes;
         autoClickers = Number(data.autoClickers) || autoClickers;
+        custoAutoClicker = Number(data.custoAutoClicker) || custoAutoClicker;
         tempoCrescimento = Math.max(TEMPO_CRESCIMENTO_MIN, Number(data.tempoCrescimento) || tempoCrescimento);
+        comprasUpgrade5s = Number(data.comprasUpgrade5s) || comprasUpgrade5s;
+        comprasUpgrade10s = Number(data.comprasUpgrade10s) || comprasUpgrade10s;
+        multiplicadorDeLucro = Number(data.multiplicadorDeLucro) || multiplicadorDeLucro;
+        custoFertilizante = Number(data.custoFertilizante) || custoFertilizante;
+        custoSemente = Number(data.custoSemente) || custoSemente;
+        custoExpandirFazenda = Number(data.custoExpandirFazenda) || custoExpandirFazenda;
+        nivelPlantacao = Number(data.nivelPlantacao) || nivelPlantacao;
+        habilidade3x3Comprada = Boolean(data.habilidade3x3Comprada);
+        habilidade5x5Comprada = Boolean(data.habilidade5x5Comprada);
+        habilidadeFazendaCompletaDesbloqueada = Boolean(data.habilidadeFazendaCompletaDesbloqueada);
         rows = Number(data.rows) || rows;
         cols = Number(data.cols) || cols;
 
@@ -118,6 +184,7 @@ function carregarJogo() {
             }
         }
 
+        atualizarMultiplicadorNivel();
         return true;
     } catch (error) {
         console.warn('Falha ao carregar o jogo salvo:', error);
@@ -284,7 +351,7 @@ function processarFazendaInteira() {
             tilesParaPlantar.push(tile);
         } else if (tile.state === 'colheita') {
             tile.state = 'terra';
-            moedas += Math.round(10 * multiplicadorNivel);
+            moedas += calcularValorColheita();
             sementes += 1;
             actions++;
         }
@@ -426,7 +493,7 @@ function processarArea(centerCol, centerRow, radius) {
                 actions++;
             } else if (actionType === 'colheita' && tile.state === 'colheita') {
                 tile.state = 'terra';
-                moedas += Math.round(10 * multiplicadorNivel);
+                moedas += calcularValorColheita();
                 sementes += 1;
                 actions++;
             }
@@ -627,7 +694,7 @@ canvas.addEventListener('click', (e) => {
 
     if (tile.state === 'colheita') {
         tile.state = 'terra';
-        moedas += Math.round(10 * multiplicadorNivel);
+        moedas += calcularValorColheita();
         sementes += 1;
         atualizarUI();
     }
@@ -637,7 +704,7 @@ document.getElementById('comprar-semente').addEventListener('click', () => {
     if (moedas >= custoSemente) {
         moedas -= custoSemente;
         sementes += 1;
-        custoSemente = Math.ceil(custoSemente * 1.05);
+        custoSemente = Math.floor(custoSemente * 1.2);
         atualizarUI();
     } else {
         alert('Você não tem moedas suficientes para comprar uma semente.');
@@ -700,8 +767,10 @@ document.getElementById('comprar-ajudante').addEventListener('click', () => {
 });
 
 document.getElementById('upgrade-velocidade-5s').addEventListener('click', () => {
-    if (moedas >= COSTO_UPGRADE_5S) {
-        moedas -= COSTO_UPGRADE_5S;
+    const custoDinamico = calcularCustoUpgrade5s();
+    if (moedas >= custoDinamico) {
+        moedas -= custoDinamico;
+        comprasUpgrade5s++;
         tempoCrescimento = Math.max(TEMPO_CRESCIMENTO_MIN, tempoCrescimento - 5);
         atualizarUI();
     } else {
@@ -710,14 +779,30 @@ document.getElementById('upgrade-velocidade-5s').addEventListener('click', () =>
 });
 
 document.getElementById('upgrade-velocidade-10s').addEventListener('click', () => {
-    if (moedas >= COSTO_UPGRADE_10S) {
-        moedas -= COSTO_UPGRADE_10S;
+    const custoDinamico = calcularCustoUpgrade10s();
+    if (moedas >= custoDinamico) {
+        moedas -= custoDinamico;
+        comprasUpgrade10s++;
         tempoCrescimento = Math.max(TEMPO_CRESCIMENTO_MIN, tempoCrescimento - 10);
         atualizarUI();
     } else {
         alert('Moedas insuficientes para comprar o upgrade de velocidade.');
     }
 });
+
+const btnFertilizante = document.getElementById('melhorar-fertilizante');
+if (btnFertilizante) {
+    btnFertilizante.addEventListener('click', () => {
+        if (moedas >= custoFertilizante) {
+            moedas -= custoFertilizante;
+            multiplicadorDeLucro += INCREMENTO_FERTILIZANTE;
+            custoFertilizante = Math.ceil(custoFertilizante * 1.5);
+            atualizarUI();
+        } else {
+            alert('Moedas insuficientes para comprar a melhoria de fertilizante.');
+        }
+    });
+}
 
 document.getElementById('expandir-fazenda').addEventListener('click', expandirFazenda);
 
