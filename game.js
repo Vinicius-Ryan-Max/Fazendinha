@@ -10,8 +10,10 @@ let lastFrameTimestamp = null;
 let modoPlantio = 'normal';
 let moedas = 5; // valor inicial para testes
 let sementes = 5;
-const TEMPO_CRESCIMENTO_BASE = 30000;
-let modificadorVelocidade = 1;
+const TEMPO_CRESCIMENTO_BASE = 30;
+const TEMPO_CRESCIMENTO_MIN = 1;
+let tempoCrescimento = TEMPO_CRESCIMENTO_BASE;
+const SAVE_KEY = 'fazendinhaGameSave';
 let custoSemente = 5;
 let custoExpandirFazenda = 250;
 let expandirParaColuna = true;
@@ -65,10 +67,90 @@ function atualizarUI() {
     document.getElementById('modo-fazenda').style.display = habilidadeFazendaCompletaDesbloqueada ? 'block' : 'none';
 
     atualizarEvolucaoUI();
+    salvarJogo();
 }
 
 function getTempoCrescimento() {
-    return Math.max(5000, Math.round(TEMPO_CRESCIMENTO_BASE / modificadorVelocidade));
+    return Math.max(TEMPO_CRESCIMENTO_MIN, tempoCrescimento) * 1000;
+}
+
+function salvarJogo() {
+    try {
+        const saveData = {
+            moedas,
+            sementes,
+            autoClickers,
+            tempoCrescimento,
+            rows,
+            cols,
+            grid: grid.map(tile => ({ state: tile.state, tempoCrescimento: tile.tempoCrescimento }))
+        };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+        mostrarMensagemSave('Jogo Salvo!');
+    } catch (error) {
+        console.warn('Não foi possível salvar o jogo:', error);
+    }
+}
+
+function carregarJogo() {
+    try {
+        const saved = localStorage.getItem(SAVE_KEY);
+        if (!saved) return false;
+
+        const data = JSON.parse(saved);
+        if (!data || typeof data !== 'object' || !Array.isArray(data.grid)) return false;
+
+        moedas = Number(data.moedas) || moedas;
+        sementes = Number(data.sementes) || sementes;
+        autoClickers = Number(data.autoClickers) || autoClickers;
+        tempoCrescimento = Math.max(TEMPO_CRESCIMENTO_MIN, Number(data.tempoCrescimento) || tempoCrescimento);
+        rows = Number(data.rows) || rows;
+        cols = Number(data.cols) || cols;
+
+        grid = [];
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const index = r * cols + c;
+                const savedTile = data.grid[index] || { state: 'grama', tempoCrescimento: 0 };
+                const tile = criarTile(r, c, savedTile.state || 'grama');
+                tile.tempoCrescimento = Number(savedTile.tempoCrescimento) || 0;
+                grid.push(tile);
+            }
+        }
+
+        return true;
+    } catch (error) {
+        console.warn('Falha ao carregar o jogo salvo:', error);
+        return false;
+    }
+}
+
+function mostrarMensagemSave(text) {
+    let mensagem = document.getElementById('save-message');
+    if (!mensagem) {
+        mensagem = document.createElement('div');
+        mensagem.id = 'save-message';
+        mensagem.style.position = 'absolute';
+        mensagem.style.right = '20px';
+        mensagem.style.top = '20px';
+        mensagem.style.padding = '10px 14px';
+        mensagem.style.background = 'rgba(0, 0, 0, 0.75)';
+        mensagem.style.color = '#fff';
+        mensagem.style.borderRadius = '8px';
+        mensagem.style.fontSize = '14px';
+        mensagem.style.zIndex = '1000';
+        mensagem.style.opacity = '0';
+        mensagem.style.transition = 'opacity 0.3s ease';
+        document.body.appendChild(mensagem);
+    }
+
+    mensagem.textContent = text;
+    mensagem.style.opacity = '1';
+
+    clearTimeout(mensagem.hideTimeout);
+    mensagem.hideTimeout = setTimeout(() => {
+        mensagem.style.opacity = '0';
+    }, 1400);
 }
 
 function criarTile(r, c, state = 'grama') {
@@ -283,7 +365,10 @@ function onImageError(imageName, event) {
 }
 
 function startGame() {
-    init();
+    const loaded = carregarJogo();
+    if (!loaded) {
+        init();
+    }
     ajustarCanvasResponsivo();
     atualizarUI();
     setModoPlantio('normal');
@@ -617,7 +702,7 @@ document.getElementById('comprar-ajudante').addEventListener('click', () => {
 document.getElementById('upgrade-velocidade-5s').addEventListener('click', () => {
     if (moedas >= COSTO_UPGRADE_5S) {
         moedas -= COSTO_UPGRADE_5S;
-        modificadorVelocidade *= 1.2;
+        tempoCrescimento = Math.max(TEMPO_CRESCIMENTO_MIN, tempoCrescimento - 5);
         atualizarUI();
     } else {
         alert('Moedas insuficientes para comprar o upgrade de velocidade.');
@@ -627,7 +712,7 @@ document.getElementById('upgrade-velocidade-5s').addEventListener('click', () =>
 document.getElementById('upgrade-velocidade-10s').addEventListener('click', () => {
     if (moedas >= COSTO_UPGRADE_10S) {
         moedas -= COSTO_UPGRADE_10S;
-        modificadorVelocidade *= 1.5;
+        tempoCrescimento = Math.max(TEMPO_CRESCIMENTO_MIN, tempoCrescimento - 10);
         atualizarUI();
     } else {
         alert('Moedas insuficientes para comprar o upgrade de velocidade.');
