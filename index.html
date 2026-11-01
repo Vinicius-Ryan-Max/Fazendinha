@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Magic Garden Clone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazendinha</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,42 +14,116 @@
             <div class="stats">Modo: <span id="modo-plantio">Normal</span></div>
             <div class="stats">Fazenda: <span id="fazenda-tamanho">8x12</span></div>
             <div class="stats">Crescimento: <span id="tempo-cultivo">30s</span></div>
+            <div class="stats">Rank: <span id="rank-fazenda">Semente</span></div>
+            <button id="som-toggle" class="stats sound-toggle" type="button" aria-pressed="true">🔊 Som</button>
         </div>
+    </div>
+
+    <div id="tela-animais">
+        <button id="voltar-animais" type="button">← Voltar à fazenda</button>
+        <section class="animal-habitat">
+            <div class="barn-sky">🌤️</div>
+            <div class="barn-title">
+                <span>🐔</span>
+                <div>
+                    <h2>Fazendinha dos animais</h2>
+                    <p>Seus animais continuam produzindo enquanto você cuida da plantação.</p>
+                </div>
+                <span>🐄</span>
+            </div>
+            <div id="animal-pasture" class="animal-pasture" aria-live="polite"></div>
+            <div class="animal-inventory">
+                <div>🐔 Galinhas: <strong id="animais-galinhas">0</strong></div>
+                <div>🐄 Vacas: <strong id="animais-vacas">0</strong></div>
+                <div>🥚 Ovos: <strong id="animais-ovos">0</strong></div>
+                <div>🥛 Leites: <strong id="animais-leites">0</strong></div>
+            </div>
+            <div class="animal-actions">
+                <button id="tela-comprar-galinha" type="button">Comprar galinha</button>
+                <button id="tela-comprar-vaca" type="button">Comprar vaca</button>
+                <button id="tela-vender-ovos" type="button">Vender ovos</button>
+                <button id="tela-vender-leite" type="button">Vender leite</button>
+            </div>
+            <p id="animal-production-status" class="muted-text">As galinhas botam ovos a cada 30 segundos. As vacas produzem leite a cada 50 segundos.</p>
+        </section>
     </div>
 
     <div id="game-layout">
         <div id="main-container">
             <canvas id="gameCanvas" width="600" height="400"></canvas>
+            <p id="area-preview-hint" class="area-preview-hint" hidden></p>
+            <section id="game-progress" aria-live="polite">
+                <div class="progress-card">
+                    <strong>🎯 Próximo objetivo</strong>
+                    <span id="objetivo-tutorial">Prepare seu primeiro canteiro</span>
+                    <div class="tutorial-progress"><span id="progresso-tutorial"></span></div>
+                </div>
+                <div class="progress-card">
+                    <strong id="evento-titulo">🌤️ Clima da fazenda</strong>
+                    <span id="evento-descricao">Um novo clima chegará em instantes.</span>
+                    <span id="evento-tempo" class="muted-text"></span>
+                </div>
+            </section>
         </div>
     </div>
 
     <div id="shop-panel">
+        <h2 class="shop-title">🌱 Fazenda</h2>
         <div id="shop-grid">
-            <button id="comprar-semente">Comprar Semente</button>
-            <button id="comprar-3x3">Habilidade 3x3</button>
-            <button id="comprar-5x5">Habilidade 5x5</button>
-            <button id="upgrade-velocidade-5s">Comprar -5s</button>
-            <button id="upgrade-velocidade-10s">Comprar -10s</button>
-            <button id="expandir-fazenda">Expandir Fazenda</button>
-            <button id="melhorar-fertilizante">Melhorar Fertilizante</button>
-            <button id="modo-descoberta">Modo Descoberta</button>
-            <div id="mode-panel">
-                <button id="modo-normal">Modo Normal</button>
-                <button id="modo-3x3">Modo 3x3</button>
-                <button id="modo-5x5">Modo 5x5</button>
-            <button id="modo-fazenda" style="display:none;">Modo Fazenda</button>
-        </div>
-            <button class="shop-placeholder" disabled>Em breve</button>
-            <button class="shop-placeholder" disabled>Em breve</button>
-            <button class="shop-placeholder" disabled>Em breve</button>
-            <button class="shop-placeholder" disabled>Em breve</button>
-            <button id="easter-egg-trigger" class="shop-placeholder">Em breve</button>
+            <section class="shop-section">
+                <h3>🛒 Loja</h3>
+                <button id="comprar-semente">Comprar Semente</button>
+                <button id="expandir-fazenda">Expandir Fazenda</button>
+            </section>
+            <section class="shop-section">
+                <h3>⚡ Melhorias</h3>
+                <button id="upgrade-velocidade-5s">Comprar -5s</button>
+                <button id="upgrade-velocidade-10s">Comprar -10s</button>
+                <button id="melhorar-fertilizante">Melhorar Fertilizante</button>
+            </section>
+            <section class="shop-section">
+                <h3>🧤 Habilidades</h3>
+                <button id="comprar-3x3">Habilidade 3x3</button>
+                <button id="comprar-5x5">Habilidade 5x5</button>
+                <div id="mode-panel">
+                    <button id="modo-normal">Modo Normal</button>
+                    <button id="modo-3x3">Modo 3x3</button>
+                    <button id="modo-5x5">Modo 5x5</button>
+                    <button id="modo-fazenda" style="display:none;">Modo Fazenda</button>
+                </div>
+                <button id="modo-descoberta">🌳 Descoberta</button>
+                <button id="modo-animais" type="button">🐔 Modo Animais</button>
+                <button id="modo-missoes" type="button">🎯 Missões</button>
+                <button id="easter-egg-trigger" class="secret-button" aria-label="Desbloqueie o segredo da fazenda">🔒 Segredo da fazenda</button>
+            </section>
+            <section class="shop-section">
+                <h3>🌾 Culturas</h3>
+                <button id="cultivo-cenoura" type="button">🥕 Cenoura · rápida</button>
+                <button id="cultivo-abobora" type="button">🎃 Desbloquear abóbora</button>
+            </section>
+            <section class="shop-section">
+                <h3>🐄 Animais</h3>
+                <button id="comprar-galinha" type="button">Comprar galinha</button>
+                <button id="comprar-vaca" type="button">Comprar vaca</button>
+                <button id="vender-ovos" type="button">Vender ovos</button>
+                <button id="vender-leite" type="button">Vender leite</button>
+            </section>
+            <section class="shop-section farm-controls">
+                <h3>💾 Progresso</h3>
+                <button id="exportar-save" type="button">Exportar progresso</button>
+                <button id="reiniciar-jogo" type="button">Reiniciar fazenda</button>
+            </section>
         </div>
     </div>
 
     <button id="shop-toggle" aria-label="Abrir loja">🛒 Loja</button>
+    <div id="area-touch-controls" class="area-touch-controls" hidden>
+        <span id="area-touch-message">Toque no terreno para escolher a área.</span>
+        <button id="confirmar-area" type="button">Aplicar área</button>
+        <button id="cancelar-area" type="button">Cancelar</button>
+    </div>
 
-    <div id="tela-descoberta" class="hidden-screen">
+    <div id="tela-descoberta">
         <button id="voltar-descoberta">Voltar</button>
         <div id="descoberta-conteudo">
             <img id="arvore-descoberta" src="img/Arvore.png" alt="Árvore da Evolução">
@@ -65,7 +139,33 @@
         </div>
     </div>
 
-    <div id="easter-egg-overlay" class="hidden-overlay"></div>
+    <div id="tela-missoes">
+        <button id="voltar-missoes" type="button">← Voltar à fazenda</button>
+        <section class="mission-board">
+            <header class="mission-board-header">
+                <div>
+                    <h2>🎯 Quadro de missões</h2>
+                    <p>Conclua uma missão para receber moedas e liberar a próxima. Há sempre novos desafios.</p>
+                </div>
+            </header>
+            <nav class="mission-tabs" aria-label="Categorias de missões">
+                <button class="mission-tab selected-mode" type="button" data-mission-tab="diarias" aria-selected="true">📅 Diárias</button>
+                <button class="mission-tab" type="button" data-mission-tab="semanais" aria-selected="false">🗓️ Semanais</button>
+                <button class="mission-tab" type="button" data-mission-tab="jornada" aria-selected="false">🌱 Jornada</button>
+            </nav>
+            <article id="mission-card" class="mission-card" aria-live="polite">
+                <span id="mission-cycle" class="mission-cycle">Missão diária</span>
+                <h3 id="mission-title">Carregando missão...</h3>
+                <p id="mission-description">Progresso: 0/0</p>
+                <div class="mission-progress"><span id="mission-progress-bar"></span></div>
+                <strong id="mission-reward">Recompensa: 0 moedas</strong>
+                <span id="mission-next" class="muted-text"></span>
+            </article>
+        </section>
+    </div>
+
+    <div id="easter-egg-overlay"></div>
+    <div id="game-toasts" class="game-toasts" aria-live="polite"></div>
     <script src="game.js"></script>
 </body>
 </html>
